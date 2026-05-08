@@ -1,0 +1,28 @@
+# ClipFlow Studio runtime artifacts
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs / config / DB
+logs/
+config/clipflow.db
+config/config.json
+
+# Outputs and temp
+outputs/*
+!outputs/.gitkeep
+temp/*
+!temp/.gitkeep
+
+# Bundled tools
+tools/ffmpeg/*
+!tools/ffmpeg/.gitkeep
+tools/deno/*
+!tools/deno/.gitkeep
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
