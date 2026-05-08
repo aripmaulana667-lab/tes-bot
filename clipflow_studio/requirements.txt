@@ -1,0 +1,23 @@
+# ClipFlow Studio - Python dependencies
+# Tested on Python 3.11+
+
+# GUI
+customtkinter>=5.2.0
+Pillow>=10.0.0
+
+# Downloader
+yt-dlp>=2024.5.0
+
+# Transcription (free / open-source)
+faster-whisper>=1.0.0
+
+# NLP for highlight detection
+sentence-transformers>=2.7.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# HTTP / utilities
+requests>=2.31.0
+
+# Optional but recommended
+tqdm>=4.66.0
