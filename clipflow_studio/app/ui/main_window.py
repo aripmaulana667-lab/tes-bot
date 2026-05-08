@@ -50,7 +50,9 @@ def _section(parent, title: str) -> "ctk.CTkFrame":
     label = ctk.CTkLabel(
         box, text=title, font=font(15, "bold"), text_color=DARK_PALETTE.text
     )
-    label.pack(anchor="w", padx=14, pady=(12, 4))
+    # Use grid so callers (which always use grid for the body) can place
+    # additional rows below without mixing geometry managers in the same box.
+    label.grid(row=0, column=0, sticky="w", padx=14, pady=(12, 4))
     return box
 
 
