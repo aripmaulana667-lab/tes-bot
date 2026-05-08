@@ -31,6 +31,7 @@ class Clip:
     reasons: List[str] = field(default_factory=list)
     segments: List[TranscriptSegment] = field(default_factory=list)
     selected: bool = False
+    db_id: Optional[int] = None  # SQLite primary key once persisted
 
     @property
     def duration(self) -> float:
@@ -46,6 +47,7 @@ class Clip:
             "duration_preset": self.duration_preset,
             "reasons": list(self.reasons),
             "selected": self.selected,
+            "db_id": self.db_id,
         }
 
 

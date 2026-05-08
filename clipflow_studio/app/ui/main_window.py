@@ -884,7 +884,7 @@ class MainWindow:
                     },
                 )
                 for clip in clips:
-                    db.add_clip(
+                    clip.db_id = db.add_clip(
                         project_id=self.current_project_id,
                         start_time=clip.start,
                         end_time=clip.end,
@@ -1025,8 +1025,13 @@ class MainWindow:
             success = sum(1 for r in results if r.success)
             failed = sum(1 for r in results if not r.success)
             for clip, result in zip(selected, results):
-                if result.success and result.output_path and self.current_project_id:
-                    db.mark_clip_exported(clip.index, result.output_path)
+                if (
+                    result.success
+                    and result.output_path
+                    and self.current_project_id
+                    and clip.db_id is not None
+                ):
+                    db.mark_clip_exported(clip.db_id, result.output_path)
             self._ui_progress(
                 f"Export selesai: {success} OK, {failed} gagal.",
                 1.0,
