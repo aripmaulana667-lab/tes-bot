@@ -19,6 +19,9 @@ LiveStreamServer/bin/*
 !LiveStreamServer/bin/.gitkeep
 LiveStreamController/config.json
 
+# Garbage left over when bootstrap_environment is run on non-Windows during dev.
+LiveStreamServer/C:\\*
+
 # PyInstaller / build outputs
 build/
 dist/

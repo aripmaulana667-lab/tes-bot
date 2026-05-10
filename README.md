@@ -47,16 +47,36 @@ kali mau menjalankan) di masing-masing folder.
 1. Install Python 3.10+ dari https://python.org (centang **"Add Python to PATH"**).
 2. Salin folder `LiveStreamServer/` ke VPS, dobel-klik `setup.bat` — script
    akan membuat `.venv` dan `pip install -r requirements.txt` otomatis.
-3. Dobel-klik `run.bat` untuk start server. Tutup jendela CMD untuk stop.
+3. Dobel-klik `run.bat` untuk start server. Akan muncul **jendela GUI**
+   yang menampilkan Host/IP, Port, Username, Password, dan API Token
+   lengkap dengan tombol **Copy** di tiap field — tinggal di-copy ke
+   controller laptop.
 
-Atau lewat command line:
+GUI server juga punya:
+
+- Tombol **Show / Hide** untuk password & API token.
+- Tombol **Copy ALL** untuk menyalin semua info koneksi sekaligus.
+- Tombol **Open /docs** untuk membuka OpenAPI viewer di browser VPS.
+- Tombol **Refresh IPs** kalau IP LAN berubah.
+- Server log live di bagian bawah jendela.
+- Status FFmpeg (installed / belum) ditampilkan di tengah.
+
+Untuk mode tanpa GUI (mis. server berjalan sebagai layanan), pakai:
+
+```bat
+python server_app.py --console
+```
+
+Atau full command line setup:
 
 ```bat
 cd LiveStreamServer
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-python server_app.py
+python server_app.py            :: jendela GUI
+:: atau
+python server_app.py --console  :: tanpa GUI
 ```
 
 Pada pertama kali dijalankan:
@@ -87,6 +107,9 @@ Saat pertama dibuka, controller menampilkan dialog **"Hubungkan ke Server"**:
 isi IP/host VPS, port (default `8765`), dan masukkan API token (atau
 username `admin` + password `admin123`).
 
+Tip: buka GUI server di VPS, klik tombol **Copy ALL**, paste ke chat /
+notepad di laptop, lalu salin masing-masing ke field di controller.
+
 ---
 
 ## 2. Membuka port di Windows VPS
@@ -101,6 +124,24 @@ New-NetFirewallRule -DisplayName "LiveStream API" -Direction Inbound `
 
 Disarankan membatasi `RemoteAddress` ke IP laptop kamu agar lebih aman, atau
 menempatkan server di balik reverse-proxy + HTTPS (mis. Caddy / Nginx).
+
+### Tidak bisa connect dari laptop?
+
+Cek hal-hal berikut secara berurutan:
+
+1. **GUI server kelihatan running?** Status di pojok kanan atas harus
+   `● running on :8765` (hijau). Kalau merah / abu-abu, klik *Start Server*.
+2. **IP yang dipakai sudah benar?** Di GUI server, dropdown Host / IP
+   menampilkan semua IP yang dikenal VPS. Kalau VPS punya IP publik,
+   dropdown mungkin hanya menampilkan IP LAN — isi manual IP publik VPS
+   di controller.
+3. **Firewall Windows sudah dibuka?** Jalankan command PowerShell di atas.
+4. **Firewall provider VPS?** Vendor VPS (DigitalOcean / AWS / Azure /
+   Hyper-V) biasanya punya firewall terpisah — buka inbound TCP `8765`
+   dari IP laptop.
+5. **Coba dari VPS sendiri dulu:** klik *Open /docs* di GUI server. Kalau
+   browser di VPS bisa buka `/docs`, server jalan normal; masalah ada di
+   network / firewall.
 
 ---
 
