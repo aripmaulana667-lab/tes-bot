@@ -37,9 +37,17 @@ class LoginDialog(QDialog):
         title.setStyleSheet("font-size: 16px; font-weight: 600;")
         layout.addWidget(title)
 
+        hint = QLabel(
+            "Isi <b>IP VPS</b> (yang biasa dipakai untuk RDP). Jangan pakai 127.0.0.1\n"
+            "kecuali server jalan di laptop yang sama."
+        )
+        hint.setStyleSheet("color: #8d96a3;")
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
+
         form = QFormLayout()
         self.host_edit = QLineEdit(config.server_host)
-        self.host_edit.setPlaceholderText("contoh: 203.0.113.10 atau vps.example.com")
+        self.host_edit.setPlaceholderText("IP VPS, contoh: 203.0.113.10 atau 192.168.40.54")
         self.port_edit = QSpinBox()
         self.port_edit.setRange(1, 65535)
         self.port_edit.setValue(config.server_port)
@@ -88,17 +96,33 @@ class LoginDialog(QDialog):
         client = APIClient(cfg.base_url, cfg.api_token)
         return client, cfg
 
+    def _validate_host(self) -> bool:
+        host = self.host_edit.text().strip()
+        if not host:
+            QMessageBox.warning(
+                self,
+                "Host kosong",
+                "Isi Host / IP VPS dulu.\n\n"
+                "Pakai IP yang sama yang kamu pakai untuk RDP ke VPS.",
+            )
+            return False
+        return True
+
     def _on_test(self) -> None:
+        if not self._validate_host():
+            return
         client, cfg = self._build_client()
         try:
             if not cfg.api_token and self.password_edit.text():
                 client.login(cfg.username, self.password_edit.text())
-            client.server_status() if cfg.api_token or client.token else client.server_status()
-            QMessageBox.information(self, "Tes Koneksi", "Koneksi ke server berhasil.")
+            client.server_status()
+            QMessageBox.information(self, "Tes Koneksi", f"Koneksi ke {cfg.base_url} berhasil.")
         except APIError as exc:
-            QMessageBox.critical(self, "Tes Koneksi Gagal", str(exc))
+            QMessageBox.critical(self, "Tes Koneksi Gagal", self._friendly_error(exc, cfg))
 
     def _on_connect(self) -> None:
+        if not self._validate_host():
+            return
         client, cfg = self._build_client()
         try:
             if not cfg.api_token:
@@ -111,7 +135,7 @@ class LoginDialog(QDialog):
                 client.token = cfg.api_token
             client.server_status()
         except APIError as exc:
-            QMessageBox.critical(self, "Gagal Terhubung", str(exc))
+            QMessageBox.critical(self, "Gagal Terhubung", self._friendly_error(exc, cfg))
             return
 
         if cfg.remember_token:
@@ -122,6 +146,30 @@ class LoginDialog(QDialog):
 
         self.config = cfg
         self.accept()
+
+    def _friendly_error(self, exc: APIError, cfg: ControllerConfig) -> str:
+        msg = str(exc)
+        host = cfg.server_host or "127.0.0.1"
+        hints = []
+        if "actively refused" in msg or "10061" in msg or "ConnectionRefusedError" in msg:
+            hints.append(
+                f"Tidak ada server yang dengar di {host}:{cfg.server_port}. "
+                "Pastikan: (1) server jalan dengan status hijau di VPS, "
+                "(2) Host yang kamu isi adalah IP VPS (bukan 127.0.0.1 dari laptop), "
+                "(3) port 8765 dibuka di firewall Windows + firewall provider VPS."
+            )
+        if "timed out" in msg.lower() or "10060" in msg:
+            hints.append(
+                f"Timeout konek ke {host}:{cfg.server_port}. "
+                "Biasanya port di-block firewall \u2014 buka port 8765 di firewall VPS dan firewall provider."
+            )
+        if cfg.use_https and "HTTPSConnectionPool" in msg:
+            hints.append(
+                "Server tidak pakai HTTPS. Hilangkan centang 'Gunakan HTTPS' kecuali kamu pasang reverse proxy TLS sendiri."
+            )
+        if hints:
+            return msg + "\n\n" + "\n\n".join(hints)
+        return msg
 
     def get_result(self) -> Optional[Tuple[ControllerConfig, APIClient]]:
         if self.result() != QDialog.Accepted:

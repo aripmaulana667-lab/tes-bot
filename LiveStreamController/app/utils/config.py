@@ -14,7 +14,7 @@ CONFIG_PATH = os.path.join(_HERE, "config.json")
 
 @dataclass
 class ControllerConfig:
-    server_host: str = "127.0.0.1"
+    server_host: str = ""
     server_port: int = 8765
     use_https: bool = False
     api_token: str = ""
@@ -23,8 +23,9 @@ class ControllerConfig:
 
     @property
     def base_url(self) -> str:
+        host = self.server_host or "127.0.0.1"
         scheme = "https" if self.use_https else "http"
-        return f"{scheme}://{self.server_host}:{self.server_port}"
+        return f"{scheme}://{host}:{self.server_port}"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
