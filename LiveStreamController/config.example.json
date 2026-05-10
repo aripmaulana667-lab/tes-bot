@@ -1,0 +1,8 @@
+{
+    "server_host": "",
+    "server_port": 8765,
+    "use_https": false,
+    "api_token": "",
+    "username": "admin",
+    "remember_token": true
+}

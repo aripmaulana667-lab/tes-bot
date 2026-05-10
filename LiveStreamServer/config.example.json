@@ -1,0 +1,17 @@
+{
+    "app_name": "LiveStreamServer",
+    "host": "0.0.0.0",
+    "port": 8765,
+    "base_dir": "C:\\LiveStreamServer",
+    "videos_dir": "C:\\LiveStreamServer\\videos",
+    "logs_dir": "C:\\LiveStreamServer\\logs",
+    "bin_dir": "C:\\LiveStreamServer\\bin",
+    "ffmpeg_path": "",
+    "database_url": "sqlite:///C:\\LiveStreamServer\\database.db",
+    "default_admin_username": "admin",
+    "default_admin_password": "admin123",
+    "api_token": "",
+    "auto_restart_default": false,
+    "stream_loop_default": true,
+    "max_upload_mb": 4096
+}
