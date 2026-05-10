@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -38,12 +39,22 @@ class LoginDialog(QDialog):
         layout.addWidget(title)
 
         hint = QLabel(
-            "Isi <b>IP VPS</b> (yang biasa dipakai untuk RDP). Jangan pakai 127.0.0.1\n"
-            "kecuali server jalan di laptop yang sama."
+            "Isi <b>IP VPS</b> (yang biasa dipakai untuk RDP), atau paste "
+            "<b>URL Tunnel</b> dari GUI server (https://...trycloudflare.com)."
         )
         hint.setStyleSheet("color: #8d96a3;")
         hint.setWordWrap(True)
         layout.addWidget(hint)
+
+        url_row = QHBoxLayout()
+        self.url_edit = QLineEdit()
+        self.url_edit.setPlaceholderText("Paste URL Tunnel di sini, contoh: https://abc-def.trycloudflare.com")
+        self.url_apply_btn = QPushButton("Pakai URL Ini")
+        self.url_apply_btn.setProperty("secondary", True)
+        self.url_apply_btn.clicked.connect(self._apply_url)
+        url_row.addWidget(self.url_edit, 1)
+        url_row.addWidget(self.url_apply_btn)
+        layout.addLayout(url_row)
 
         form = QFormLayout()
         self.host_edit = QLineEdit(config.server_host)
@@ -95,6 +106,33 @@ class LoginDialog(QDialog):
         )
         client = APIClient(cfg.base_url, cfg.api_token)
         return client, cfg
+
+    def _apply_url(self) -> None:
+        raw = self.url_edit.text().strip()
+        if not raw:
+            QMessageBox.information(
+                self,
+                "URL kosong",
+                "Paste URL Tunnel dari GUI server lebih dulu, lalu klik tombol ini.",
+            )
+            return
+        if "://" not in raw:
+            raw = "https://" + raw
+        try:
+            parsed = urlparse(raw)
+        except ValueError:
+            QMessageBox.warning(self, "URL tidak valid", f"Tidak bisa parse URL: {raw}")
+            return
+        if not parsed.hostname:
+            QMessageBox.warning(self, "URL tidak valid", f"Tidak ada hostname di URL: {raw}")
+            return
+        scheme = (parsed.scheme or "https").lower()
+        is_https = scheme == "https"
+        port = parsed.port or (443 if is_https else 80)
+        self.host_edit.setText(parsed.hostname)
+        self.port_edit.setValue(port)
+        self.https_check.setChecked(is_https)
+        self.url_edit.clear()
 
     def _validate_host(self) -> bool:
         host = self.host_edit.text().strip()

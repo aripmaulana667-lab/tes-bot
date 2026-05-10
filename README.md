@@ -112,26 +112,56 @@ notepad di laptop, lalu salin masing-masing ke field di controller.
 
 ---
 
-## 2. Membuka port di Windows VPS
+## 2. Akses controller dari laptop
 
-Aplikasi memakai port TCP `8765` secara default. Pilih salah satu cara
-berikut (paling atas paling mudah):
+Ada **dua cara** menghubungkan controller ke server. Pilih satu:
 
-**Cara 1 — tombol di GUI server:** klik **"Buka Port Firewall"** di GUI
-server. Akan muncul prompt UAC, klik *Yes*. Selesai.
+### Cara A (paling mudah) — Tunnel Internet (Cloudflare)
 
-**Cara 2 — dobel-klik `open-firewall.bat`:** file ada di folder
+Cocok kalau kamu **tidak bisa atau tidak mau buka port firewall** di
+VPS. Server konek **keluar** ke Cloudflare lewat port 443 (yang selalu
+terbuka karena dipakai HTTPS biasa), Cloudflare beri kamu URL publik
+seperti `https://abc-def.trycloudflare.com`. Controller di laptop
+tinggal pakai URL itu.
+
+Langkah:
+
+1. Di GUI server, klik **"Aktifkan Tunnel Internet"**.
+2. Server otomatis download `cloudflared.exe` (sekali saja, ~25 MB).
+3. Tunggu beberapa detik sampai field "Tunnel URL" terisi.
+4. Klik **Copy URL Tunnel**.
+5. Di laptop, buka controller. Di dialog login, paste URL di kolom
+   "Paste URL Tunnel di sini" dan klik **Pakai URL Ini** — host, port,
+   dan HTTPS terisi otomatis.
+6. Paste API Token, klik Tes Koneksi.
+
+Catatan tentang quick tunnel: gratis, tanpa registrasi, tapi URL ganti
+tiap kali tunnel di-restart. Untuk URL tetap, pakai *Named Tunnels*
+Cloudflare (perlu domain + Cloudflare account).
+
+### Cara B — Buka port di Windows VPS
+
+Aplikasi memakai port TCP `8765` secara default. Tiga opsi (paling atas
+paling mudah):
+
+**Opsi 1 — tombol di GUI server:** klik **"Buka Port Firewall"** di
+GUI server. Akan muncul prompt UAC, klik *Yes*. Selesai.
+
+**Opsi 2 — dobel-klik `open-firewall.bat`:** file ada di folder
 `LiveStreamServer/`. Auto minta UAC, otomatis bikin aturan firewall.
 
-**Cara 3 — PowerShell (Administrator) manual:**
+**Opsi 3 — PowerShell (Administrator) manual:**
 
 ```powershell
 New-NetFirewallRule -DisplayName "LiveStream API" -Direction Inbound `
     -Protocol TCP -LocalPort 8765 -Action Allow
 ```
 
-Disarankan membatasi `RemoteAddress` ke IP laptop kamu agar lebih aman, atau
-menempatkan server di balik reverse-proxy + HTTPS (mis. Caddy / Nginx).
+Untuk VPS dari provider cloud, cek juga firewall provider-nya (panel
+DigitalOcean / AWS Security Group / dll) — port 8765 harus dibuka di
+sana juga. Disarankan membatasi `RemoteAddress` ke IP laptop kamu agar
+lebih aman, atau menempatkan server di balik reverse-proxy + HTTPS
+(mis. Caddy / Nginx).
 
 ### Tidak bisa connect dari laptop?
 

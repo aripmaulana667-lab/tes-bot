@@ -25,7 +25,13 @@ class ControllerConfig:
     def base_url(self) -> str:
         host = self.server_host or "127.0.0.1"
         scheme = "https" if self.use_https else "http"
-        return f"{scheme}://{host}:{self.server_port}"
+        port = int(self.server_port)
+        # Drop the port suffix when it's the default for the scheme so URLs
+        # for things like Cloudflare quick tunnels look clean
+        # (https://x.trycloudflare.com instead of :443).
+        if (scheme == "https" and port == 443) or (scheme == "http" and port == 80):
+            return f"{scheme}://{host}"
+        return f"{scheme}://{host}:{port}"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

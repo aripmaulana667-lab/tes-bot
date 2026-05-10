@@ -161,7 +161,7 @@ class ServerWindow(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("LiveStream Server")
-        self.geometry("760x620")
+        self.geometry("820x720")
         self.configure(bg=self.PALETTE["bg"])
         self.minsize(720, 520)
 
@@ -270,6 +270,10 @@ class ServerWindow(tk.Tk):
         self.base_url_entry = self._row_entry(card, "Base URL", self.base_url_var)
         self._host_var.trace_add("write", lambda *_: self.base_url_var.set(self._compute_base_url()))
 
+        # ---- tunnel URL row ---------------------------------------
+        self.tunnel_url_var = tk.StringVar(value="(belum aktif)")
+        self.tunnel_url_entry = self._row_entry(card, "Tunnel URL", self.tunnel_url_var)
+
         # ---- ffmpeg status ----------------------------------------
         self.ffmpeg_label = ttk.Label(card, text="FFmpeg: ...", style="Status.TLabel")
         self.ffmpeg_label.grid(row=self._row, column=0, columnspan=3, sticky="w", pady=(12, 0))
@@ -285,6 +289,29 @@ class ServerWindow(tk.Tk):
         ttk.Button(actions, text="Open /docs", style="Secondary.TButton", command=self._open_docs).pack(side="left", padx=6)
         ttk.Button(actions, text="Copy ALL", style="Secondary.TButton", command=self._copy_all).pack(side="left", padx=6)
         ttk.Button(actions, text="Refresh IPs", style="Secondary.TButton", command=self._refresh_ips).pack(side="left", padx=6)
+
+        # ---- tunnel actions row -----------------------------------
+        tunnel_actions = tk.Frame(card, bg=self.PALETTE["card"])
+        tunnel_actions.grid(row=self._row, column=0, columnspan=3, sticky="ew", pady=(8, 0))
+        self._row += 1
+        self.tunnel_btn = ttk.Button(
+            tunnel_actions,
+            text="Aktifkan Tunnel Internet",
+            style="Accent.TButton",
+            command=self._toggle_tunnel,
+        )
+        self.tunnel_btn.pack(side="left", padx=(0, 6))
+        ttk.Button(
+            tunnel_actions,
+            text="Copy URL Tunnel",
+            style="Secondary.TButton",
+            command=self._copy_tunnel_url,
+        ).pack(side="left", padx=6)
+        ttk.Label(
+            tunnel_actions,
+            text="\u2192 controller bisa konek dari mana saja, tanpa buka port firewall",
+            style="Sub.TLabel",
+        ).pack(side="left", padx=10)
 
         # ---- log view ---------------------------------------------
         log_frame = ttk.Frame(outer, style="Card.TFrame", padding=10)
@@ -482,11 +509,105 @@ class ServerWindow(tk.Tk):
         threading.Thread(target=stopper, daemon=True).start()
 
     def _open_docs(self) -> None:
-        url = f"{self._compute_base_url()}/docs"
+        url = self._url_for_docs()
         try:
             webbrowser.open(url)
         except Exception:  # noqa: BLE001
             messagebox.showerror("Open /docs", f"Tidak bisa membuka browser. URL: {url}")
+
+    def _url_for_docs(self) -> str:
+        # Prefer the public tunnel URL when active; falls back to base URL.
+        try:
+            from app.services.tunnel import get_tunnel  # noqa: WPS433
+
+            t = get_tunnel()
+            if t.is_running and t.url:
+                return f"{t.url}/docs"
+        except Exception:  # noqa: BLE001
+            pass
+        return f"{self._compute_base_url()}/docs"
+
+    # ---- tunnel ---------------------------------------------------
+
+    def _toggle_tunnel(self) -> None:
+        try:
+            from app.services.tunnel import get_tunnel  # noqa: WPS433
+        except Exception as exc:  # noqa: BLE001
+            messagebox.showerror("Tunnel Internet", f"Modul tunnel gagal di-load: {exc}")
+            return
+        t = get_tunnel()
+        if t.is_running:
+            self._stop_tunnel(t)
+            return
+        self._start_tunnel(t)
+
+    def _start_tunnel(self, tunnel) -> None:  # noqa: ANN001
+        # Make sure the local API server is running first so cloudflared has
+        # something to forward to.
+        if not (self._server_thread and self._server_thread.is_alive()):
+            self._start_server()
+
+        def url_cb(url: str) -> None:
+            def apply() -> None:
+                self.tunnel_url_var.set(url)
+                self.tunnel_btn.configure(text="Stop Tunnel")
+            try:
+                self.after(0, apply)
+            except RuntimeError:
+                pass
+
+        def log_cb(line: str) -> None:
+            try:
+                self.after(0, self._append_text_log, f"[cloudflared] {line}")
+            except RuntimeError:
+                pass
+
+        def exit_cb(rc: int) -> None:
+            def apply() -> None:
+                self.tunnel_url_var.set("(berhenti)")
+                self.tunnel_btn.configure(text="Aktifkan Tunnel Internet")
+            try:
+                self.after(0, apply)
+            except RuntimeError:
+                pass
+
+        tunnel.on_url(url_cb)
+        tunnel.on_log(log_cb)
+        tunnel.on_exit(exit_cb)
+        self.tunnel_url_var.set("(menghubungkan ke Cloudflare...)")
+        self.tunnel_btn.configure(text="Stop Tunnel")
+
+        def runner() -> None:
+            try:
+                tunnel.start()
+            except Exception as exc:  # noqa: BLE001
+                self.after(0, lambda: messagebox.showerror("Tunnel Internet", str(exc)))
+                self.after(0, lambda: self.tunnel_btn.configure(text="Aktifkan Tunnel Internet"))
+                self.after(0, lambda: self.tunnel_url_var.set("(gagal)"))
+
+        threading.Thread(target=runner, daemon=True).start()
+
+    def _stop_tunnel(self, tunnel) -> None:  # noqa: ANN001
+        self.tunnel_btn.configure(text="Aktifkan Tunnel Internet")
+        self.tunnel_url_var.set("(belum aktif)")
+        threading.Thread(target=tunnel.stop, daemon=True).start()
+
+    def _copy_tunnel_url(self) -> None:
+        url = (self.tunnel_url_var.get() or "").strip()
+        if url.startswith("https://") and ".trycloudflare.com" in url:
+            self._copy(url)
+        else:
+            messagebox.showwarning(
+                "Copy URL Tunnel",
+                "Tunnel belum aktif. Klik 'Aktifkan Tunnel Internet' dulu, "
+                "tunggu sampai URL muncul.",
+            )
+
+    def _append_text_log(self, line: str) -> None:
+        self.log_text.configure(state="normal")
+        self.log_text.insert("end", line + "\n")
+        self.log_text.see("end")
+        self.log_text.configure(state="disabled")
 
     def _open_firewall(self) -> None:
         if os.name != "nt":
