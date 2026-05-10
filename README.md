@@ -114,10 +114,18 @@ notepad di laptop, lalu salin masing-masing ke field di controller.
 
 ## 2. Membuka port di Windows VPS
 
-Aplikasi memakai port TCP `8765` secara default. Buka firewall:
+Aplikasi memakai port TCP `8765` secara default. Pilih salah satu cara
+berikut (paling atas paling mudah):
+
+**Cara 1 — tombol di GUI server:** klik **"Buka Port Firewall"** di GUI
+server. Akan muncul prompt UAC, klik *Yes*. Selesai.
+
+**Cara 2 — dobel-klik `open-firewall.bat`:** file ada di folder
+`LiveStreamServer/`. Auto minta UAC, otomatis bikin aturan firewall.
+
+**Cara 3 — PowerShell (Administrator) manual:**
 
 ```powershell
-# PowerShell (Administrator)
 New-NetFirewallRule -DisplayName "LiveStream API" -Direction Inbound `
     -Protocol TCP -LocalPort 8765 -Action Allow
 ```

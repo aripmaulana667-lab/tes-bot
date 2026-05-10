@@ -281,6 +281,7 @@ class ServerWindow(tk.Tk):
         self._row += 1
         ttk.Button(actions, text="Start Server", style="Accent.TButton", command=self._start_server).pack(side="left", padx=(0, 6))
         ttk.Button(actions, text="Stop", style="Secondary.TButton", command=self._stop_server).pack(side="left", padx=6)
+        ttk.Button(actions, text="Buka Port Firewall", style="Secondary.TButton", command=self._open_firewall).pack(side="left", padx=6)
         ttk.Button(actions, text="Open /docs", style="Secondary.TButton", command=self._open_docs).pack(side="left", padx=6)
         ttk.Button(actions, text="Copy ALL", style="Secondary.TButton", command=self._copy_all).pack(side="left", padx=6)
         ttk.Button(actions, text="Refresh IPs", style="Secondary.TButton", command=self._refresh_ips).pack(side="left", padx=6)
@@ -486,6 +487,56 @@ class ServerWindow(tk.Tk):
             webbrowser.open(url)
         except Exception:  # noqa: BLE001
             messagebox.showerror("Open /docs", f"Tidak bisa membuka browser. URL: {url}")
+
+    def _open_firewall(self) -> None:
+        if os.name != "nt":
+            messagebox.showinfo(
+                "Buka Port Firewall",
+                "Tombol ini hanya jalan di Windows. Di OS lain, buka port "
+                f"{self.settings.port}/TCP secara manual di firewall-mu.",
+            )
+            return
+        if not messagebox.askyesno(
+            "Buka Port Firewall",
+            (
+                f"Akan menambah aturan inbound TCP {self.settings.port} di Windows Firewall.\n\n"
+                "Akan muncul prompt UAC (klik Yes untuk approve).\n\nLanjut?"
+            ),
+        ):
+            return
+        bat_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "open-firewall.bat")
+        try:
+            if os.path.isfile(bat_path):
+                # Run the .bat which already self-elevates via UAC.
+                import ctypes  # local import
+
+                ctypes.windll.shell32.ShellExecuteW(  # type: ignore[attr-defined]
+                    None, "runas", bat_path, None, os.path.dirname(bat_path), 1,
+                )
+            else:
+                # Fallback: run netsh directly with elevation.
+                import ctypes  # local import
+
+                rule_name = "LiveStream API"
+                params = (
+                    f'advfirewall firewall add rule name="{rule_name}" '
+                    f'dir=in protocol=TCP localport={self.settings.port} action=allow profile=any'
+                )
+                ctypes.windll.shell32.ShellExecuteW(  # type: ignore[attr-defined]
+                    None, "runas", "netsh", params, None, 1,
+                )
+            messagebox.showinfo(
+                "Buka Port Firewall",
+                "Aturan firewall berhasil dibuat (atau sedang dibuat). "
+                "Coba hubungkan controller dari laptop sekarang.",
+            )
+        except Exception as exc:  # noqa: BLE001
+            messagebox.showerror(
+                "Buka Port Firewall",
+                f"Gagal menambah aturan firewall: {exc}\n\n"
+                "Buka PowerShell sebagai Administrator dan jalankan:\n"
+                f'New-NetFirewallRule -DisplayName "LiveStream API" -Direction Inbound -Protocol TCP -LocalPort {self.settings.port} -Action Allow',
+            )
 
     def _on_close(self) -> None:
         self._stop_server()
