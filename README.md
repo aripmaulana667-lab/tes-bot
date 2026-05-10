@@ -39,17 +39,23 @@ LiveStreamServer/                 LiveStreamController/
 
 ## 1. Quick start
 
+Cara termudah di Windows: dobel-klik `setup.bat` (sekali) lalu `run.bat` (tiap
+kali mau menjalankan) di masing-masing folder.
+
 ### Server (Windows VPS / RDP)
 
+1. Install Python 3.10+ dari https://python.org (centang **"Add Python to PATH"**).
+2. Salin folder `LiveStreamServer/` ke VPS, dobel-klik `setup.bat` — script
+   akan membuat `.venv` dan `pip install -r requirements.txt` otomatis.
+3. Dobel-klik `run.bat` untuk start server. Tutup jendela CMD untuk stop.
+
+Atau lewat command line:
+
 ```bat
-# 1. Install Python 3.10+ dari https://python.org (centang "Add to PATH")
-# 2. Buka PowerShell di drive yang ada salinan repo, lalu:
 cd LiveStreamServer
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-
-# 3. Jalankan server
 python server_app.py
 ```
 
@@ -62,6 +68,12 @@ Pada pertama kali dijalankan:
 - Server jalan di `http://0.0.0.0:8765` dan mengekspos OpenAPI di `/docs`.
 
 ### Controller (Laptop)
+
+1. Install Python 3.10+ di laptop (centang **"Add Python to PATH"**).
+2. Dobel-klik `LiveStreamController\setup.bat` (sekali) untuk install dependency.
+3. Dobel-klik `LiveStreamController\run.bat` untuk membuka aplikasi controller.
+
+Atau lewat command line:
 
 ```bat
 cd LiveStreamController
