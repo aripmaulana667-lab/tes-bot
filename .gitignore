@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Per-instance generated files (do NOT commit)
+LiveStreamServer/config.json
+LiveStreamServer/database.db
+LiveStreamServer/videos/*
+!LiveStreamServer/videos/.gitkeep
+LiveStreamServer/logs/*
+!LiveStreamServer/logs/.gitkeep
+LiveStreamServer/bin/*
+!LiveStreamServer/bin/.gitkeep
+LiveStreamController/config.json
+
+# PyInstaller / build outputs
+build/
+dist/
+*.spec
+
+# IDE
+.idea/
+.vscode/
+*.swp
