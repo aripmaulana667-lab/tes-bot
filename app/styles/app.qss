@@ -1,0 +1,217 @@
+/* Music Spectrum Lyric Video Maker - light, modern editor styling */
+
+* {
+    font-family: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow, QWidget {
+    background-color: #F7F8FA;
+    color: #0F172A;
+}
+
+QFrame#Card {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+}
+
+QLabel#SectionTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0F172A;
+}
+
+QLabel#Subtle {
+    color: #64748B;
+}
+
+QLabel#StatusOk {
+    color: #16A34A;
+    font-weight: 600;
+}
+
+QLabel#StatusBad {
+    color: #DC2626;
+    font-weight: 600;
+}
+
+/* Tabs */
+QTabWidget::pane {
+    border: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    border-radius: 10px;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background: transparent;
+    color: #475569;
+    padding: 8px 16px;
+    margin-right: 2px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+QTabBar::tab:hover {
+    background: #EEF2FF;
+    color: #1F2937;
+}
+
+QTabBar::tab:selected {
+    background: #FFFFFF;
+    color: #1D4ED8;
+    border: 1px solid #E5E7EB;
+    border-bottom: 1px solid #FFFFFF;
+    font-weight: 600;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 6px 14px;
+    min-height: 18px;
+}
+
+QPushButton:hover {
+    background-color: #F1F5F9;
+    border-color: #94A3B8;
+}
+
+QPushButton:pressed {
+    background-color: #E2E8F0;
+}
+
+QPushButton:disabled {
+    color: #94A3B8;
+    background-color: #F1F5F9;
+    border-color: #E2E8F0;
+}
+
+QPushButton#PrimaryButton {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border: 1px solid #1D4ED8;
+}
+
+QPushButton#PrimaryButton:hover {
+    background-color: #1D4ED8;
+}
+
+QPushButton#PrimaryButton:pressed {
+    background-color: #1E40AF;
+}
+
+QPushButton#DangerButton {
+    background-color: #FFFFFF;
+    color: #DC2626;
+    border: 1px solid #FCA5A5;
+}
+
+QPushButton#DangerButton:hover {
+    background-color: #FEE2E2;
+}
+
+/* Inputs */
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit, QTextEdit {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 4px 8px;
+    selection-background-color: #BFDBFE;
+    selection-color: #0F172A;
+}
+
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus,
+QComboBox:focus, QPlainTextEdit:focus, QTextEdit:focus {
+    border-color: #3B82F6;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+
+QGroupBox {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    margin-top: 14px;
+    background: #FFFFFF;
+    padding: 8px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 6px;
+    color: #1F2937;
+    font-weight: 600;
+}
+
+/* Sliders */
+QSlider::groove:horizontal {
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 2px;
+}
+QSlider::handle:horizontal {
+    background: #2563EB;
+    width: 14px;
+    height: 14px;
+    margin: -6px 0;
+    border-radius: 7px;
+}
+QSlider::sub-page:horizontal {
+    background: #93C5FD;
+    border-radius: 2px;
+}
+
+/* Progress */
+QProgressBar {
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    background: #F1F5F9;
+    text-align: center;
+    color: #0F172A;
+    height: 16px;
+}
+QProgressBar::chunk {
+    background-color: #2563EB;
+    border-radius: 5px;
+}
+
+/* List / tree */
+QListWidget, QTreeWidget, QTableWidget {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+}
+
+QHeaderView::section {
+    background: #F8FAFC;
+    border: none;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 6px 8px;
+    color: #475569;
+    font-weight: 600;
+}
+
+QPlainTextEdit#LogView {
+    background: #0B1220;
+    color: #E2E8F0;
+    border: 1px solid #1E293B;
+    font-family: "Cascadia Mono", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+QStatusBar {
+    background: #FFFFFF;
+    color: #475569;
+    border-top: 1px solid #E5E7EB;
+}
