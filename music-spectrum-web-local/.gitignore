@@ -1,0 +1,35 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Storage (jangan commit konten user)
+storage/music/*
+storage/lyrics/*
+storage/backgrounds/*
+storage/logos/*
+storage/outputs/*
+storage/temp/*
+!storage/music/.gitkeep
+!storage/lyrics/.gitkeep
+!storage/backgrounds/.gitkeep
+!storage/logos/.gitkeep
+!storage/outputs/.gitkeep
+!storage/temp/.gitkeep
+
+# FFmpeg portable (besar)
+tools/ffmpeg/bin/
+tools/ffmpeg/presets/
+tools/ffmpeg/doc/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
